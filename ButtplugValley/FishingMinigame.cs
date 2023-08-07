@@ -18,7 +18,7 @@ namespace ButtplugValley
         private IModHelper helper;
         private IReflectionHelper reflectionHelper;
         private ModConfig modConfig;
-        public float previousCaptureLevel;
+        public float previousVibrationLevel;
         private BPManager _bpManager;
         private IMonitor monitor;
         public bool isActive = true;
@@ -35,7 +35,7 @@ namespace ButtplugValley
             modConfig = ModConfig;
             _bpManager = MEbpManager;
             reflectionHelper = helper.Reflection;
-            previousCaptureLevel = 0f;
+            previousVibrationLevel = 0f;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
@@ -83,11 +83,11 @@ namespace ButtplugValley
                         float capturePercentage = Math.Min(scaledCaptureLevel, maxVibration);
 
                         // Vibrate the device based on the capture percentage if it has changed
-                        if (capturePercentage != previousCaptureLevel)
+                        if (capturePercentage != previousVibrationLevel)
                         {
                             monitor.Log($"FISHINGMINIGAME {capturePercentage}", LogLevel.Debug);
                             _ = _bpManager.VibrateDevice(capturePercentage);
-                            previousCaptureLevel = capturePercentage;
+                            previousVibrationLevel = capturePercentage;
                         }
                         break;
 
@@ -108,24 +108,40 @@ namespace ButtplugValley
                         float bobberPos = bobberPositionField.GetValue();
                         int barHeight = bobberBarHeightField.GetValue();
 
+                        float middleOfBobber = (bobberPos - 2f);
+
+                        float halfBar = (float)barHeight / 2;
+                        float middleOfBar = bobberBarPos - 32f + halfBar;
+
+                        float distanceBetween = Math.Abs(middleOfBar - middleOfBobber);
+
+                        float calculatedVibrationValue = ((-.5f / halfBar) * distanceBetween) + 1;
+
+                        // Scale the capture level based on the maximum vibration value
+                        float scaledVibrationValue = calculatedVibrationValue * maxVibration;
+
+                        // Ensure the scaled capture level does not exceed the maximum vibration value
+                        float vibrationPercentage = Math.Min(scaledVibrationValue, maxVibration);
+
+                        // Vibrate the device based on the capture percentage if it has changed
+                        if (vibrationPercentage != previousVibrationLevel)
+                        {
+                            monitor.Log($"FISHINGMINIGAME {vibrationPercentage}", LogLevel.Debug);
+                            _ = _bpManager.VibrateDevice(vibrationPercentage);
+                            previousVibrationLevel = vibrationPercentage;
+                        }
+
                         break;
-
-
                 }
-
-               
-                
-
-                
             }
             else
             {
                 // The bobber bar menu is no longer active, stop vibrating the device
-                if (previousCaptureLevel > 0)
+                if (previousVibrationLevel > 0)
                 {
                     monitor.Log("Stopping device vibration", LogLevel.Debug);
                     _bpManager.VibrateDevice(0);
-                    previousCaptureLevel = 0;
+                    previousVibrationLevel = 0;
                 }
             }
         }
@@ -135,7 +151,7 @@ namespace ButtplugValley
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             // Reset previous capture level when a new day starts
-            previousCaptureLevel = 0f;
+            previousVibrationLevel = 0f;
         }
         
     }
