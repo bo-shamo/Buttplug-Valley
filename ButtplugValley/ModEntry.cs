@@ -325,6 +325,22 @@ namespace ButtplugValley
                 max: 100
             );
             /*
+             * Text Options
+             */
+            configMenu.AddSectionTitle(mod: this.ModManifest, text: () => "Text Options");
+            configMenu.AddTextOption(
+                mod: this.ModManifest,
+                name: () => "Fishing Minigame Type",
+                tooltip: () => "Choose what style of vibration you want from the fishing minigame",
+                getValue: () => this.Config.FishingMinigameSetting.ToString(),
+                setValue: value => {
+                    FishingMinigameType newType;
+                    Enum.TryParse(value, out newType);
+                    this.Config.FishingMinigameSetting = newType;
+                },
+                allowedValues: new string[] { FishingMinigameType.CatchLevel.ToString(), FishingMinigameType.DistanceToCenterCatchBar.ToString() }
+            );
+            /*
              * Keybinds
              */
             configMenu.AddSectionTitle(mod:this.ModManifest, text: () => "Keybinds");

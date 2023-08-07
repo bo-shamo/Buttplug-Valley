@@ -17,6 +17,8 @@ namespace ButtplugValley
         public bool VibrateOnDayEnd { get; set; } = true;
         
         public bool VibrateOnFishingMinigame { get; set; } = true;
+
+        public FishingMinigameType FishingMinigameSetting { get; set; } = FishingMinigameType.CatchLevel;
         
         public bool VibrateOnArcade { get; set; } = true;
         
