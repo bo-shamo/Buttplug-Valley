@@ -36,7 +36,6 @@ namespace ButtplugValley
             _bpManager = MEbpManager;
             reflectionHelper = helper.Reflection;
             previousCaptureLevel = 0f;
-            maxVibration = modConfig.MaxFishingVibration;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
@@ -59,6 +58,7 @@ namespace ButtplugValley
 
             if (Game1.activeClickableMenu is StardewValley.Menus.BobberBar menu)
             {
+                maxVibration = modConfig.MaxFishingVibration;
                 monitor.Log("FishingMinigameIsActive", LogLevel.Debug);
 
                 switch(modConfig.FishingMinigameSetting)
