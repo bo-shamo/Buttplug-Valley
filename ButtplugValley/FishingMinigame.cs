@@ -96,7 +96,9 @@ namespace ButtplugValley
                         bool inBar = bobberInBarField.GetValue();
                         if (!inBar)
                         {
-                            _ = _bpManager.VibrateDevice(maxVibration * 0.1f);
+                            float reducedVibration = maxVibration * 0.1f;
+                            _ = _bpManager.VibrateDevice(reducedVibration);
+                            monitor.Log($"FISHINGMINIGAME {reducedVibration}", LogLevel.Debug);
                             break;
                         }
 
