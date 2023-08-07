@@ -21,7 +21,7 @@ This mod allows you to connect your Buttplug.io compatible toys to Stardew Valle
 * Vibrations on picking up fish, crops and milk. (Scales with quality)
 * Vibrations on day end and start.
 * Vibrations on fully breaking rocks.
-* Vibrations in the Fishing Minigame (Scales with the green capture bar)
+* Vibrations in the Fishing Minigame (Scales with the green capture bar or distance to fish)
 * Vibrations on killing enemies. Scales with the amount of enemies killed at once.
 * Scaling vibrations with the amount of stones broken at once.
 * Vibrations in the arcade machine games.
