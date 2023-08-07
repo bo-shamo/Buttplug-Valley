@@ -35,7 +35,7 @@ namespace ButtplugValley
         {
             this.Config = this.Helper.ReadConfig<ModConfig>();
             buttplugManager = new BPManager();
-            fishingMinigame = new FishingMinigame(helper, Monitor, buttplugManager);
+            fishingMinigame = new FishingMinigame(helper, Monitor, buttplugManager, Config);
             Task.Run(async () =>
             {
                 await buttplugManager.ConnectButtplug(Monitor, Config.IntifaceIP);

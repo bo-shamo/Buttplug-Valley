@@ -7,25 +7,36 @@ using StardewValley;
 
 namespace ButtplugValley
 {
+    public enum FishingMinigameType
+    {
+        CatchLevel,
+        DistanceToCenterCatchBar
+    }
+
     internal class FishingMinigame
     {
         private IModHelper helper;
         private IReflectionHelper reflectionHelper;
+        private ModConfig modConfig;
         public float previousCaptureLevel;
         private BPManager _bpManager;
         private IMonitor monitor;
         public bool isActive = true;
+
+        private bool lastInBarStatus = true;
         
         
         public float maxVibration = 100f; // Adjust as desired
 
-        public FishingMinigame(IModHelper modHelper, IMonitor MeMonitor, BPManager MEbpManager)
+        public FishingMinigame(IModHelper modHelper, IMonitor MeMonitor, BPManager MEbpManager, ModConfig ModConfig)
         {
             helper = modHelper;
             monitor = MeMonitor;
+            modConfig = ModConfig;
             _bpManager = MEbpManager;
             reflectionHelper = helper.Reflection;
             previousCaptureLevel = 0f;
+            maxVibration = modConfig.MaxFishingVibration;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
@@ -50,31 +61,62 @@ namespace ButtplugValley
             {
                 monitor.Log("FishingMinigameIsActive", LogLevel.Debug);
 
-                // Get the distanceFromCatching field using reflection
-                IReflectedField<float> distanceFromCatchingField = this.reflectionHelper.GetField<float>(menu, "distanceFromCatching");
-
-                if (distanceFromCatchingField == null)
+                switch(modConfig.FishingMinigameSetting)
                 {
-                    monitor.Log("distanceFromCatching field not found", LogLevel.Debug);
-                    return;
+                    case FishingMinigameType.CatchLevel:
+                        // Get the distanceFromCatching field using reflection
+                        IReflectedField<float> distanceFromCatchingField = this.reflectionHelper.GetField<float>(menu, "distanceFromCatching");
+
+                        if (distanceFromCatchingField == null)
+                        {
+                            monitor.Log("distanceFromCatching field not found", LogLevel.Debug);
+                            return;
+                        }
+
+                        float captureLevel = distanceFromCatchingField.GetValue();
+                        monitor.Log($"distancefrom {captureLevel}", LogLevel.Debug);
+
+                        // Scale the capture level based on the maximum vibration value
+                        float scaledCaptureLevel = captureLevel * maxVibration;
+
+                        // Ensure the scaled capture level does not exceed the maximum vibration value
+                        float capturePercentage = Math.Min(scaledCaptureLevel, maxVibration);
+
+                        // Vibrate the device based on the capture percentage if it has changed
+                        if (capturePercentage != previousCaptureLevel)
+                        {
+                            monitor.Log($"FISHINGMINIGAME {capturePercentage}", LogLevel.Debug);
+                            _ = _bpManager.VibrateDevice(capturePercentage);
+                            previousCaptureLevel = capturePercentage;
+                        }
+                        break;
+
+                    case FishingMinigameType.DistanceToCenterCatchBar:
+                        IReflectedField<bool> bobberInBarField = this.reflectionHelper.GetField<bool>(menu, "bobberInBar");
+                        bool inBar = bobberInBarField.GetValue();
+                        if (!inBar)
+                        {
+                            _ = _bpManager.VibrateDevice(maxVibration * 0.1f);
+                            break;
+                        }
+
+                        IReflectedField<float> bobberBarPosField = this.reflectionHelper.GetField<float>(menu, "bobberBarPos");
+                        IReflectedField<int> bobberBarHeightField = this.reflectionHelper.GetField<int>(menu, "bobberBarHeight");
+                        IReflectedField<float> bobberPositionField = this.reflectionHelper.GetField<float>(menu, "bobberPosition");
+
+                        float bobberBarPos = bobberBarPosField.GetValue();
+                        float bobberPos = bobberPositionField.GetValue();
+                        int barHeight = bobberBarHeightField.GetValue();
+
+                        break;
+
+
                 }
 
-                float captureLevel = distanceFromCatchingField.GetValue();
-                monitor.Log($"distancefrom {captureLevel}", LogLevel.Debug);
+               
+                
 
-                // Scale the capture level based on the maximum vibration value
-                float scaledCaptureLevel = captureLevel * maxVibration;
-
-                // Ensure the scaled capture level does not exceed the maximum vibration value
-                float capturePercentage = Math.Min(scaledCaptureLevel, maxVibration);
-
-                // Vibrate the device based on the capture percentage if it has changed
-                if (capturePercentage != previousCaptureLevel)
-                {
-                    monitor.Log($"FISHINGMINIGAME {capturePercentage}", LogLevel.Debug);
-                    _bpManager.VibrateDevice(capturePercentage);
-                    previousCaptureLevel = capturePercentage;
-                }
+                
             }
             else
             {
