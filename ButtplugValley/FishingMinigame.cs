@@ -142,7 +142,7 @@ namespace ButtplugValley
                 if (previousVibrationLevel > 0)
                 {
                     monitor.Log("Stopping device vibration", LogLevel.Debug);
-                    _bpManager.VibrateDevice(0);
+                    _ = _bpManager.VibrateDevice(0);
                     previousVibrationLevel = 0;
                 }
             }
